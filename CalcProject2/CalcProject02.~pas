@@ -1,0 +1,681 @@
+unit CalcProject02;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls;
+
+type
+  TForm1 = class(TForm)
+    Btn0: TButton;
+    Btn1: TButton;
+    Btn2: TButton;
+    Btn3: TButton;
+    Btn4: TButton;
+    Btn5: TButton;
+    Btn6: TButton;
+    Btn7: TButton;
+    Btn8: TButton;
+    Btn9: TButton;
+    DivBtn: TButton;
+    MulBtn: TButton;
+    MinusBtn: TButton;
+    DotBtn: TButton;
+    PlusBtn: TButton;
+    BackSpaceBtn: TButton;
+    ClearBtn: TButton;
+    EqualBtn: TButton;
+    Edit1: TEdit;
+    Edit2: TEdit;
+    SubClearBtn: TButton;
+    RootBtn: TButton;
+    SquareBtn: TButton;
+    ReciprocalBtn: TButton;
+    procedure Btn1Click(Sender: TObject);  // 계산기 숫자버튼  1
+    procedure Btn2Click(Sender: TObject);  // 계산기 숫자버튼  2
+    procedure Btn3Click(Sender: TObject);  // 계산기 숫자버튼  3
+    procedure Btn4Click(Sender: TObject);  // 계산기 숫자버튼  4
+    procedure Btn5Click(Sender: TObject);  // 계산기 숫자버튼  5
+    procedure Btn6Click(Sender: TObject);  // 계산기 숫자버튼  6
+    procedure Btn7Click(Sender: TObject);  // 계산기 숫자버튼  7
+    procedure Btn8Click(Sender: TObject);  // 계산기 숫자버튼  8
+    procedure Btn9Click(Sender: TObject);  // 계산기 숫자버튼  9
+    procedure Btn0Click(Sender: TObject);  // 계산기 숫자버튼  0
+    procedure DotBtnClick(Sender: TObject);
+    procedure Init();
+    procedure EqualBtnClick(Sender: TObject);  // 초기화 프로시져
+    procedure OperatorClick();                 //연산자 클릭
+    procedure Calculate();                     // 계산기
+    procedure PlusBtnClick(Sender: TObject);       // 더하기 버튼
+    procedure MinusBtnClick(Sender: TObject);      // 빼기 버튼
+    procedure MulBtnClick(Sender: TObject);        //  곱하기 버튼
+    procedure DivBtnClick(Sender: TObject);        // 나누기 버튼
+    procedure BackSpaceBtnClick(Sender: TObject);
+    procedure SubClearBtnClick(Sender: TObject);
+    procedure ClearBtnClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure RootBtnClick(Sender: TObject);
+    procedure SquareBtnClick(Sender: TObject);
+    procedure ReciprocalBtnClick(Sender: TObject);
+    
+    
+
+                        
+
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form1: TForm1;
+  result:Real=0; //결과값
+  val1:Real=0;  //피연산자1
+  val2:Real=0;  //피연산자2
+  temp:Real=0;
+  flag:Boolean=True; // 피연산자2가 있는지 저장하는 플래그
+  check:Integer; // 연산자 기호 체크
+  totalString:string; //연산자와 피연산자를 기억하는 문자열
+  delNum:string; // 숫자값 지우기 전에 저장하는 문자열
+  RFlag:Boolean=True; //결과값 리셋하기위한 플래그
+  OFlag:Boolean=True; //처음 입력값이 숫자인지 연산자인지 저장하는 플래그
+  dotFlag:Boolean=True; //dot값 플래그
+  saveTotal:string; //계산 테스트
+  KeyCheck:Boolean=True;
+
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.PlusBtnClick(Sender: TObject);
+begin
+  if(OFlag=True) then  // 숫자를 먼저 입력했을 때
+  begin
+    Edit1.Text:='+';    // + 입력
+    EqualBtn.SetFocus; // = 버튼에 포커스
+  end
+  else if(OFlag=False) then  // 숫자 먼저 입력하지 않았을 때
+  begin
+    OperatorClick(); //연산자 클릭 프로시저 실행
+    check:=0; // 변수값 0은 더하기와 연관
+    totalString := totalString + ConCat(FloatToStr(val2)); //연산대상이 되는 문자열 저장
+    saveTotal := totalString;
+    if(saveTotal=totalString) then 
+    begin
+      totalString := totalString+'+';
+      Edit2.Text := totalString;     // Edit2 에 연산식 저장
+    end
+    else
+    begin
+      Edit2.Text := totalString;
+    end;
+    temp := val1;
+    Edit1.Text := FloatToStr(temp); // 임시저장
+    dotFlag := True;       // dotFlag=true로 하고 = 버튼 누를시 false가 되도록 함
+    EqualBtn.SetFocus;      // = 버튼에 focus
+  end;
+end;
+
+procedure TForm1.MinusBtnClick(Sender: TObject);
+  begin
+  if(OFlag=True) then // 숫자 먼저 입력했을 때
+  begin
+    Edit1.Text := '-';   // - 입력
+    EqualBtn.SetFocus;   // = 버튼에 포커스
+  end
+  else if(OFlag=False) then // 숫자 먼저 입력하지 않을 때
+  begin
+    OperatorClick(); // 연산자 클릭 프로시저 실행
+    check := 1; // 변수값 1은 빼기와 연관
+    totalString := totalString + ConCat(FloatToStr(val2)+'-'); //연산 대상이 되는 문자열 저장
+    Edit2.Text := totalString;    //Edit2에 연산식 저장
+    temp := val1;
+    Edit1.Text := FloatToStr(temp); // 임시저장
+    dotFlag := True;            // dotFlag=true로 하고 = 버튼 누를시 false가 되도록 함
+    EqualBtn.SetFocus;          // = 버튼에 focus
+  end;
+end;
+
+procedure TForm1.MulBtnClick(Sender: TObject);    // * 버튼
+begin
+  if(OFlag=True) then    // 숫자 먼저 입력했을 때
+  begin
+    Edit1.Text := '*';  // * 입력
+    EqualBtn.SetFocus; // = 버튼에 포커스
+  end
+  else if(OFlag=False) then // 숫자 먼저 입력하지 않을 때
+  begin
+    OperatorClick();      //연산자 클릭 프로시저 실행
+    check := 2; // 변수값 2는 곱하기와 연관
+    totalString := totalString + ConCat(FloatToStr(val2)+'*'); // 연산 대상이 되는 문자열 저장
+    Edit2.Text := totalString; // Edit2에 연산식 저장
+    temp := val1;
+    Edit1.Text := FloatToStr(temp); // 임시저장
+    dotFlag := True;  //    dotFlag=true로 하고 = 버튼 누를시 false가 되도록 함
+    EqualBtn.SetFocus;  //   = 버튼에 focus
+  end;
+end;
+
+procedure TForm1.DivBtnClick(Sender: TObject);    // 나누기 버튼
+begin
+  if(OFlag=True) then
+  begin
+    Edit1.Text:='/';   // / 입력
+    EqualBtn.SetFocus;       // = 버튼에 포커스
+  end
+  else if(OFlag=False) then // 숫자 먼저 입력하지 않을 때
+  begin
+    OperatorClick(); // 연산자 클릭 프로시저 실행
+    check := 3; // 변수값 3은 나누기와 연관
+    if(val1=0) or (Edit1.Text = '0') or (Edit1.Text = '/') then //0으로 나눌 수 없음
+    begin
+      ShowMessage('나눌 수 없습니다');
+      exit;
+    end
+    else
+    begin
+      totalString := totalString + Concat(FloatToStr(val2) +'/'); // 연산 대상이 되는 문자열 저장
+      Edit2.Text := totalString; // Edit2에 연산식 저장
+      temp := val1;
+      Edit1.Text := FloatToStr(temp); // 임시저장
+      dotFlag := True;  // dotFlag=true로 하고 = 버튼 누를시 false가 되도록 함.
+      EqualBtn.SetFocus; // = 버튼에 focus
+    end;
+  end;
+end;
+
+procedure TForm1.RootBtnClick(Sender: TObject);
+begin
+  if(OFlag=True) then    // 숫자 먼저 입력했을 때
+  begin
+      Edit1.Text:='√';   // / 입력
+      EqualBtn.SetFocus;       // = 버튼에 포커스
+  end
+  else if(OFlag=False) then // 숫자 먼저 입력하지 않을 때
+  begin
+    OperatorClick(); // 연산자 클릭 프로시저 실행
+    check := 4;    //변수값 4는 루트와 연관
+    totalString := totalString + Concat('√('+FloatToStr(val1) +')');
+    Edit2.Text := totalString;
+    temp := val1;
+    Edit1.Text := FloatToStr(temp); // 임시저장
+    dotFlag := True;  //    dotFlag=true로 하고 = 버튼 누를시 false가 되도록 함
+    EqualBtn.SetFocus; // = 버튼에 focus
+  end;
+end;
+
+procedure TForm1.SquareBtnClick(Sender: TObject);
+begin
+  if(OFlag=True) then    // 숫자 먼저 입력했을 때
+  begin
+      Edit1.Text:='sqr';   // / 입력
+      EqualBtn.SetFocus;       // = 버튼에 포커스
+  end
+  else if(OFlag=False) then // 숫자 먼저 입력하지 않을 때
+  begin
+    OperatorClick(); // 연산자 클릭 프로시저 실행
+    check := 5;     //변수값 5는  제곱과 연관
+    totalString := totalString + Concat('sqr('+FloatToStr(val1) +')');
+    Edit2.Text := totalString;
+    temp := val1;
+    Edit1.Text := FloatToStr(temp); // 임시저장
+    dotFlag := True;  //    dotFlag=true로 하고 = 버튼 누를시 false가 되도록 함
+    EqualBtn.SetFocus; // = 버튼에 focus
+  end;
+end;
+
+procedure TForm1.ReciprocalBtnClick(Sender: TObject);
+begin
+  if(OFlag=True) then   // 숫자 먼저 입력했을 때
+  begin
+    Edit1.Text:='/';   // / 입력
+    EqualBtn.SetFocus;       // = 버튼에 포커스
+  end
+  else if(OFlag=False) then // 숫자 먼저 입력하지 않을 때
+  begin
+    OperatorClick(); // 연산자 클릭 프로시저 실행
+    check := 6; // 변수값 6은 역수와 연관
+    if(val1=0) or (Edit1.Text = '0') then //0으로 나눌 수 없음
+    begin
+      ShowMessage('나눌 수 없습니다');
+      exit;
+    end
+    else
+    begin
+      totalString := totalString + Concat('1/('+FloatToStr(val1) +')'); // 연산 대상이 되는 문자열 저장
+      Edit2.Text := totalString; // Edit2에 연산식 저장
+      temp := val1;
+      Edit1.Text := FloatToStr(temp); // 임시저장
+      dotFlag := True;  // dotFlag=true로 하고 = 버튼 누를시 false가 되도록 함.
+      EqualBtn.SetFocus; // = 버튼에 focus
+    end;
+  end;
+
+end;
+
+procedure TForm1.BackSpaceBtnClick(Sender: TObject);  // Backspace 버튼
+begin
+  delNum := Edit1.Text;
+  Delete(delNum, Length(delNum), 1);  // Delete(문자열, 시작순서, 갯 수)
+  Edit1.Text :=  delNum;
+  if(length(delNum)=0) then
+  begin
+    Edit1.Text:='0';  // 초기화
+  end
+  else if(Length(delNum)=1) then
+  begin
+    dotFlag := True;
+  end;
+  EqualBtn.SetFocus;  // = 버튼에 focus
+end;
+
+procedure TForm1.SubClearBtnClick(Sender: TObject); // 부분 Clear
+begin
+  Edit1.Text:='0'; //초기화
+  dotFlag:=True;
+  EqualBtn.SetFocus;
+end;
+
+procedure TForm1.ClearBtnClick(Sender: TObject); // Clear 버튼
+begin
+  Edit1.Text := '0';     //초기화
+  Init();               // 변수 초기화 프로시저
+  EqualBtn.SetFocus;
+end;
+
+procedure TForm1.Btn1Click(Sender: TObject); // 버튼 1
+begin
+  if(Edit1.Text='0') then  //계산기 내부 숫자가 0일 때
+  begin
+  Edit1.Clear; // 초기화
+  end;
+  Edit1.Text := Edit1.Text+'1';   // 버튼 클릭 후 1 입력
+  OFlag:=False;// 연산자버튼 연속 입력 방지 목적, 숫자가 입력되면 연산자 플래그 값은 false //
+  EqualBtn.SetFocus; // = 버튼에 포커스
+  if(RFlag=False) and (dotFlag=True) then  //  Reset 플래그 = false, dotflag=true 일 때,
+  begin
+    Edit1.Clear; // = 버튼을 누르면 Rflag= flase, edit 결과 clear 한 후 에 입력값 받는다.
+    Edit1.Text := Edit1.Text+'1'; //버튼 클릭하여 1 입력
+    RFlag := true; // RFlag=true를 하고  = 버튼을 누르면 false가 되도록 함.
+    OFlag := False; // OFlag = true 이면 연산자를 먼저 입력한 것, OFlag =  false  숫자 먼저 입력한 것
+  end;
+end;
+
+procedure TForm1.Btn2Click(Sender: TObject); //버튼 2
+begin
+  if(Edit1.Text='0') then
+  begin
+    Edit1.Clear; //내부 숫자가 0이면 초기화
+  end;
+  Edit1.Text := Edit1.Text+'2'; //버튼 클릭 후 2 입력 
+  OFlag:=False;                 // 숫자 입력시 OFlag = false;
+  EqualBtn.SetFocus;            // = 버튼에 포커스
+  if(RFlag=False) and (dotFlag=True) then
+  begin
+    Edit1.Clear;                // 결과값 clear 한 후에 입력값 받는다.
+    Edit1.Text := Edit1.Text+'2'; // 버튼 클릭하여 2 입력
+    RFlag:=True;                  //= 버튼을 눌러 flase가 되도록 한다.
+  end;
+end;
+
+procedure TForm1.Btn3Click(Sender : TObject); // 버튼 3
+begin
+  if(Edit1.Text='0') then  
+  begin
+    Edit1.Clear; // 내부 숫자 0일 때 초기화
+  end;
+  Edit1.Text:=Edit1.Text+'3';  // 3입력
+  OFlag:=False;                 //  숫자 입력시 OFlag = false
+  EqualBtn.SetFocus;             // = 버튼에 포커스
+  if(RFlag=False) and (dotFlag=True) then         // RFlag=false, dotflag=true 일 때,
+  begin
+    Edit1.Clear;                         // edit1에 있는 결과값 clear
+    Edit1.Text:=Edit1.Text+'3';          // 3 입력
+    RFlag:=True;                         // RFlag = true를 함
+  end;
+end;
+
+
+procedure TForm1.Btn4Click(Sender: TObject);  // 버튼 4
+begin
+  if(Edit1.Text='0') then
+  begin
+    Edit1.Clear;              // 내부 숫자 0일 때 초기화
+  end;
+  Edit1.Text:=Edit1.Text+'4';     // 4 입력
+  OFlag:=False;                   // 숫자 입력시 연산자 플래그 값은 false
+  EqualBtn.SetFocus;                // = 버튼에 포커스
+  if(RFlag=False) and (dotFlag=True) then             // RFlag=false, dot flag=true 일 때,
+  begin
+    Edit1.Clear;                     // = 버튼을 누르면 RFlag = false가 되므로 edit 값 clear 함
+    Edit1.Text:=Edit1.Text+'4';      // 버튼 4 입력
+    RFlag := True;                // RFlag = true를 하여 = 버튼을 누르면 false가 되도록 함
+  end;
+end;
+
+
+
+
+procedure TForm1.Btn5Click(Sender: TObject); // 버튼 5 
+begin
+  if(Edit1.Text='0') then
+  begin
+    Edit1.Clear;                 // 내부 숫자 0일 때 초기화
+  end;
+  Edit1.Text:=Edit1.Text+'5';     // 5 입력
+  OFlag:=False;                   // 숫자 입력 시 연산자 플래그 값 false
+  EqualBtn.SetFocus;                   // = 버튼에 포커스
+  if(RFlag=False) and (dotFlag=True) then    // RFlag=false, dot flag=true 일 때, 
+  begin
+    Edit1.Clear;                  // edit 값 clear 함
+    Edit1.Text:=Edit1.Text+'5';   // 버튼 5 입력
+    RFlag := True;                // RFlag = true를 하여 = 버튼을 누르면 false가 되도록 함
+  end;
+end;
+
+
+procedure TForm1.Btn6Click(Sender: TObject);    // 버튼 6
+begin
+  if(Edit1.Text='0') then
+  begin
+    Edit1.Clear;         // 내부 숫자 6일 때 초기화
+  end;
+  Edit1.Text:=Edit1.Text+'6'; // 6 입력
+  OFlag:=False;               // 숫자 입력 시 연산자 플래그 값 false
+  EqualBtn.SetFocus;                          // = 버튼 포커스
+  if(RFlag=False) and (dotFlag=True) then     // RFlag=false. dot flag=true 일 때, 
+  begin
+    Edit1.Clear;                              // = 버튼 누르면 Rflag=false 가 됨 // edit1 에 있는 결과 값 clear 하고 입력 받아야 함
+    Edit1.Text:=Edit1.Text+'6';               //6 입력
+    RFlag := true;                            //flag= true  하고 = 버튼을 누를 때 false가 되도록 함
+  end;
+end;
+
+procedure TForm1.Btn7Click(Sender: TObject);  // 버튼 7
+begin
+  if(Edit1.Text='0') then
+  begin
+    Edit1.Clear;                             // 내부 숫자 7일 때 초기화
+  end;
+  Edit1.Text:=Edit1.Text+'7';                // 버튼 7 입력
+  OFlag:=False;                              // 슷자 입력 시 연산자 플래그=false
+  EqualBtn.SetFocus;                         // = 버튼에 포커스
+  if(RFlag=False) and (dotFlag=True) then    // reset flag = false, dot flag = true 일 때, 
+  begin
+    Edit1.Clear;                            // = 버튼을 누르면 Rflag= false, edit 결과 clear
+    Edit1.Text:=Edit1.Text+'7';             // 7 입력
+    RFlag := True;                          // flag = true 하고 = 버튼을 누를 때 false가 되도록
+  end;
+end;
+
+procedure TForm1.Btn8Click(Sender: TObject);    // 버튼 8
+begin
+  if(Edit1.Text='0') then
+  begin
+    Edit1.Clear;                               // 내부 숫자 8일 때 초기화
+  end;
+  Edit1.Text:=Edit1.Text+'8';                 // 버튼 8 입력
+  OFlag:=False;                               // 숫자 입력시 연산자 플래그= false
+  EqualBtn.SetFocus;                          // = 버튼에 포커스
+  if(RFlag=False) and (dotFlag = True) then   // reset flag = false, dot flag = true 일 때,
+  begin
+    Edit1.Clear;                              // = 버튼을 누르면  Rflag=false, edit 결과 clear
+    Edit1.Text:=Edit1.Text+'8';               // 8 입력
+    RFlag := True;                            // flag = true로 하고, = 버튼 누를 때 false
+  end;
+end;
+
+
+
+
+procedure TForm1.Btn9Click(Sender: TObject);    //  버튼 9 
+begin
+  if(Edit1.Text='0') then
+  begin
+    Edit1.Clear;                          // 내부 숫자 9일 때 초기화
+  end;
+  Edit1.Text:=Edit1.Text+'9';            //  버튼 9 입력
+  OFlag:=False;                          // 숫자 입력 시 연산자 flag = false
+  EqualBtn.SetFocus;                      // = 버튼에 포커스
+  if(RFlag=False) and (dotFlag=True) then // 리셋 flag = false, dotflag= true 일 때
+  begin
+    Edit1.Clear;                      //  edit 결과 clear
+    Edit1.Text:=Edit1.Text+'9';       //  9 입력
+    RFlag := True;                    // flag = true로 하고 =  버튼을 누를 때 false
+  end;
+end;
+
+
+procedure TForm1.Btn0Click(Sender: TObject);
+begin
+    if(Edit1.Text='0') then
+    begin
+      Edit1.Clear;                   // 내부 숫자 0일 때 초기화
+    end;
+    Edit1.Text:=Edit1.Text+'0';    // 0 입력
+    OFlag:=False;
+    EqualBtn.SetFocus;
+    if(RFlag=False) and (dotFlag=True) then // 리셋 flag = false, dotflag=true 일 때
+    begin
+      Edit1.Clear;  //= 버튼을 누르면 Rflag는 false가 되므로 edit 결과 clear하고 입력값 받는다.
+      Edit1.Text:=Edit1.Text+'0'; //0 입력
+      RFlag := True; // RFlag=true로 하여  = 버튼을 누를 시 false가 되도록 함.
+    end;
+end;
+
+
+
+procedure TForm1.DotBtnClick(Sender: TObject);
+begin
+  if(dotFlag=True) then    // 소수점 입력 가능
+  begin
+  if not(Pos('.',Edit1.Text)=0) then //  소수점 있을 때
+    begin
+      Edit1.Clear;
+      Edit1.Text:=Edit1.Text+'0';
+      dotFlag:=False;
+      EqualBtn.SetFocus;
+    end;
+
+  //소수점이 없을 때
+  Edit1.Text := Edit1.Text+'.';
+  dotFlag := False; //소수점이 입력되면 다시 dotFlag를 false하여 소수점이 연속으로 안 찍히게 함
+
+  EqualBtn.SetFocus;
+  end;
+end;
+
+procedure TForm1.Init();   // 변수 초기화
+begin
+  result :=0;
+  val1 :=0;
+  val2 :=0;
+  Edit2.Text:='';
+  totalString:='';
+  RFlag:=false;
+  flag:=true;
+  dotFlag:=true;  
+end;
+
+procedure TForm1.EqualBtnClick(Sender: TObject);  // 연산자 기호 체크
+begin
+  case check of
+    0: Edit1.Text:=FloatToStr(val1+StrToFloat(Edit1.Text)); // check 변수 0일 때  +
+    1: Edit1.Text:=FloatToStr(val1-StrToFloat(Edit1.Text)); // check 변수 1일 때 -
+    2: Edit1.Text:=FloatToStr(val1*StrToFloat(Edit1.Text)); // check 변수 2일 때 *
+    3: if(val1 = 0) or (Edit1.Text = '0') then //val1 가 0일때 나눈수 없다
+        begin
+          ShowMessage('나눌 수 없습니다!');
+          exit
+        end
+       else
+       begin
+        Edit1.Text:=FloatToStr(val1/StrToFloat(Edit1.text));//check변수가 3이면 나누기
+       end;
+    4: Edit1.Text:= FloatToStr(sqrt(val1)); //루트
+    5: Edit1.Text:= FloatToStr(sqr(val1)); // 제곱
+    6: if(val1 = 0) or (Edit1.Text = '0') then //val1 가 0일때 나눈수 없다
+        begin
+           ShowMessage('나눌 수 없습니다!');
+           exit
+        end
+       else
+       begin
+        Edit1.Text := FloatToStr(1 / val1); // 역수
+       end;
+
+  end;
+        Init();
+end;
+
+procedure TForm1.OperatorClick();        // 연산자 버튼 클릭
+begin                                    //숫자 먼저 입력하고 연산자 버튼 눌렀을 때
+  if(flag=True) then                     //val1 값이 없을 때
+  begin
+    val2:=StrToFloat(Edit1.Text);
+    val1:=val2;                          //val2 값을 val1에 저장
+    Edit1.Text:='';
+    flag:=False;
+  end
+  else                                   //val1 값 있을 때
+  begin
+    val2 := StrToFloat(Edit1.Text);
+    Calculate();
+    val1 := result;
+    Edit1.Text := '';
+  end;
+end;
+
+procedure TForm1.Calculate();
+begin
+  case check of
+    0: begin
+      result := val1 + val2; // check가 0일 때 +
+    end;
+    1: begin
+      result := val1 - val2; // check가 1일 때 -
+    end;
+    2: begin                           
+      result := val1 * val2;  // check가 2일 때 *
+    end;
+    3: begin
+        if( val2 =0) or (Edit1.Text = '0') then // val2이 0이면 나누기 x
+        begin
+          ShowMessage('나눌 수 없습니다!');
+          Exit;
+        end 
+        else
+        begin
+          result := val1 / val2;
+        end;
+      end;
+    4: begin
+        result := sqrt(val1);  // check가 4일 때 루트
+      end;
+    5: begin
+        result := sqr(val1); // check가 5일 때 제곱
+      end;
+    6: begin
+        result := 1 / val1; // check가 5일 때 제곱
+      end;
+  end;
+end;
+
+
+
+
+
+
+
+procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  case Key of
+      VK_NUMPAD0: if(keycheck = false) then begin   //keycheck로 down과 press 안 겹치게 플래그
+                  Btn0.click;
+                  end;      // 숫자 0 누를 때
+      VK_NUMPAD1: if(keycheck = false) then begin
+                  Btn1.click;
+                  end;      // 숫자 1 누를 때
+      VK_NUMPAD2: if(keycheck = false) then begin
+                  Btn2.click;
+                  end;      // 숫자 2 누를 때
+      VK_NUMPAD3: if(keycheck = false) then begin
+                  Btn3.click;
+                  end;     // 숫자 3 누를 때
+      VK_NUMPAD4: if(keycheck = false) then begin
+                  Btn4.click;
+                  end;     // 숫자 4 누를 때
+      VK_NUMPAD5: if(keycheck = false) then begin
+                  Btn5.click;
+                  end;      // 숫자 5 누를 때
+      VK_NUMPAD6: if(keycheck = false) then begin
+                  Btn6.click;
+                  end;      // 숫자 6 누를 때
+      VK_NUMPAD7: if(keycheck = false) then begin
+                  Btn7.click;
+                  end;     // 숫자 7 누를 때
+      VK_NUMPAD8: if(keycheck = false) then begin
+                  Btn8.click;
+                  end;     // 숫자 8 누를 때
+      VK_NUMPAD9: if(keycheck = false) then begin
+                  Btn9.click;
+                  end;    // 숫자 9 누를 때
+      VK_DECIMAL: if(keycheck = false) then begin
+                  DotBtn.click;
+                  end;   // 점
+      VK_ADD:     if(keycheck = false) then begin
+                      PlusBtn.click;
+                      end;          // 더하기 버튼
+                       //  DELETE
+      VK_SUBTRACT: if(keycheck = false) then begin
+                      MinusBtn.click;
+                      end;                  // 빼기
+      VK_MULTIPLY: if(keycheck = false) then begin
+                      MulBtn.click;
+                      end;    // 곱하기
+      VK_DIVIDE:   if(keycheck = false) then begin
+                      DivBtn.click;
+                      end;          // 나누기
+      VK_BACK:    BackSpaceBtn.click;
+      VK_RETURN:  EqualBtn.click;
+      VK_DELETE:  ClearBtn.click;
+  else
+  end;
+  keycheck := True;
+
+end;
+
+procedure TForm1.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+
+  if(KeyCheck = True) then begin
+      case Key of
+              #48: Btn0.Click;       // 델파이 아스키코드 #48 = 0
+              #49: Btn1.Click;       // 델파이 아스키코드 #49 = 1
+              #50: Btn2.Click;       // 델파이 아스키코드 #50 = 1
+              #51: Btn3.Click;       // 델파이 아스키코드 #51 = 3
+              #52: Btn4.Click;       // 델파이 아스키코드 #52 = 4
+              #53: Btn5.Click;       // 델파이 아스키코드 #53 = 5
+              #54: Btn6.Click;       // 델파이 아스키코드 #54 = 6
+              #55: Btn7.Click;       // 델파이 아스키코드 #55 = 7
+              #56: Btn8.Click;       // 델파이 아스키코드 #56 = 8
+              #57: Btn9.Click;       // 델파이 아스키코드 #57 = 9
+              #43: PlusBtn.Click;    // 델파이 아스키코드 #43 = +
+              #45: MinusBtn.Click;   // 델파이 아스키코드 #45 = -
+              #42: MulBtn.Click;     // 델파이 아스키코드 #42 = *
+              #47: DivBtn.Click;     // 델파이 아스키코드 #47 = /
+              #46: DotBtn.Click;     // 델파이 아스키코드 #46 = .
+              #61: EqualBtn.Click;   // 델파이 아스키코드 #61 = =
+          end;
+
+    end;
+
+end;
+
+end.
